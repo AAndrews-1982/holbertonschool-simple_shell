@@ -1,0 +1,57 @@
+SIMPLE-SHELL(1)              General Commands Manual              SIMPLE-SHELL(1)
+
+NAME
+       simple-shell - a simple UNIX command interpreter
+
+SYNOPSIS
+       simple-shell [options] [command_string]
+
+DESCRIPTION
+       simple-shell is a basic command line interpreter for the UNIX operating system. It allows users to execute commands and run scripts in a shell environment.
+
+OPTIONS
+       -h, --help
+              Display help message and exit.
+
+       -v, --version
+              Display version information and exit.
+
+COMMANDS
+       Simple Shell supports a wide range of commands, including but not limited to:
+
+       cd     Change the current working directory.
+
+       ls     List the contents of the current directory.
+
+       cat    Display the contents of a file.
+
+       echo   Display a message on the terminal.
+
+       exit   Exit the shell.
+
+       In addition, simple-shell can execute scripts and commands from a file.
+
+EXAMPLES
+       $ simple-shell
+              Launches the shell in interactive mode.
+
+       $ simple-shell myscript.sh
+              Executes the shell script myscript.sh.
+
+AUTHORS
+       Holberton Simple Shell was created by Josh Davis and Alton Andrews.
+
+BUGS
+       Report any bugs to the GitHub page for this project.
+
+COPYRIGHT
+       Holberton Simple Shell is not distributed.
+
+SEE ALSO
+       bash(1), sh(1), zsh(1)
+
+       For more information, see the GitHub page for this project:
+       https://github.com/AAndrews-1982/simple_shell
+
+       For help using simple-shell, contact the authors on GitHub.
+
