@@ -2,26 +2,33 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
+#define PROMPT "#cisfun$ "
 #define BUFSIZE 1024
 
-/**
- * main - Simple shell program entry point.
- *
- * Return: 0 on success.
- */
 int main(void)
 {
     char *line = NULL;
     size_t len = 0;
     ssize_t read;
     pid_t child_pid;
+    int status;
 
     while (1)
     {
-        printf("#cisfun$ ");
+        printf(PROMPT);
+        fflush(stdout);
         if ((read = getline(&line, &len, stdin)) == -1)
-            break;
+        {
+            if (feof(stdin))
+            {
+                printf("\n");
+                exit(EXIT_SUCCESS);
+            }
+            perror("getline");
+            exit(EXIT_FAILURE);
+        }
         line[read - 1] = '\0';
         if ((child_pid = fork()) == -1)
         {
@@ -37,11 +44,23 @@ int main(void)
                 perror("execve");
                 exit(EXIT_FAILURE);
             }
-            break;
         }
         else
         {
-            waitpid(child_pid, NULL, 0);
+            waitpid(child_pid, &status, 0);
+            if (WIFEXITED(status))
+            {
+                int exit_status = WEXITSTATUS(status);
+                if (exit_status != 0)
+                {
+                    printf("Command exited with status %d\n", exit_status);
+                }
+            }
+            else if (WIFSIGNALED(status))
+            {
+                int signal_number = WTERMSIG(status);
+                printf("Command terminated by signal %d\n", signal_number);
+            }
         }
     }
     free(line);
