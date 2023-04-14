@@ -22,6 +22,7 @@ int main(void)
         printf("#cisfun$ ");
         if ((read = getline(&line, &len, stdin)) == -1)
             break;
+        line[read - 1] = '\0';
         if ((child_pid = fork()) == -1)
         {
             perror("fork");
@@ -29,15 +30,9 @@ int main(void)
         }
         if (child_pid == 0)
         {
-            char **argv = malloc(2 * sizeof(char *));
-            if (argv == NULL)
-            {
-                perror("malloc");
-                exit(EXIT_FAILURE);
-            }
+            char *argv[] = {NULL, NULL};
             argv[0] = line;
-            argv[1] = NULL;
-            if (execve(line, argv, NULL) == -1)
+            if (execve(argv[0], argv, NULL) == -1)
             {
                 perror("execve");
                 exit(EXIT_FAILURE);
@@ -52,5 +47,3 @@ int main(void)
     free(line);
     exit(EXIT_SUCCESS);
 }
-
-
