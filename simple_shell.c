@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 
 #define PROMPT "#cisfun$ "
 #define BUFSIZE 1024
@@ -26,8 +27,11 @@ int main(void)
                 printf("\n");
                 exit(EXIT_SUCCESS);
             }
-            perror("getline");
-            exit(EXIT_FAILURE);
+            else
+            {
+                perror("getline");
+                exit(EXIT_FAILURE);
+            }
         }
         line[read - 1] = '\0';
         if ((child_pid = fork()) == -1)
@@ -41,8 +45,16 @@ int main(void)
             argv[0] = line;
             if (execve(argv[0], argv, NULL) == -1)
             {
-                perror("execve");
-                exit(EXIT_FAILURE);
+                if (errno == ENOENT)
+                {
+                    printf("%s: command not found\n", line);
+                    exit(EXIT_FAILURE);
+                }
+                else
+                {
+                    perror("execve");
+                    exit(EXIT_FAILURE);
+                }
             }
         }
         else
