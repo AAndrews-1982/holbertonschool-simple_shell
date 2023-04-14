@@ -33,7 +33,7 @@ int main(void)
                 exit(EXIT_FAILURE);
             }
         }
-        line[read - 1] = '\0';
+        line[strcspn(line, "\n")] = '\0'; /* Remove trailing newline */
         if ((child_pid = fork()) == -1)
         {
             perror("fork");
@@ -41,13 +41,20 @@ int main(void)
         }
         if (child_pid == 0)
         {
-            char *argv[] = {NULL, NULL};
-            argv[0] = line;
+            char *argv[BUFSIZE];
+            int argc = 0;
+            char *token = strtok(line, " ");
+            while (token != NULL && argc < BUFSIZE - 1)
+            {
+                argv[argc++] = token;
+                token = strtok(NULL, " ");
+            }
+            argv[argc] = NULL;
             if (execve(argv[0], argv, NULL) == -1)
             {
                 if (errno == ENOENT)
                 {
-                    printf("%s: command not found\n", line);
+                    printf("%s: command not found\n", argv[0]);
                     exit(EXIT_FAILURE);
                 }
                 else
