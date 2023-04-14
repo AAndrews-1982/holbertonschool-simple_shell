@@ -1,50 +1,56 @@
 #include "shell.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
-#define PROMPT "#cisfun$ "
+#define BUFSIZE 1024
 
+/**
+ * main - Simple shell program entry point.
+ *
+ * Return: 0 on success.
+ */
 int main(void)
 {
     char *line = NULL;
     size_t len = 0;
     ssize_t read;
-    int status = 1;
+    pid_t child_pid;
 
-    while (status)
+    while (1)
     {
-        printf(PROMPT);
-        read = getline(&line, &len, stdin);
-
-        if (read == -1)
-        {
-            printf("\n");
+        printf("#cisfun$ ");
+        if ((read = getline(&line, &len, stdin)) == -1)
             break;
-        }
-
-        if (line[read - 1] == '\n')
-            line[read - 1] = '\0';
-
-        pid_t child_pid;
-        child_pid = fork();
-        if (child_pid == -1)
+        if ((child_pid = fork()) == -1)
         {
             perror("fork");
             exit(EXIT_FAILURE);
         }
-
         if (child_pid == 0)
         {
-            if (execve(line, NULL, NULL) == -1)
+            char **argv = malloc(2 * sizeof(char *));
+            if (argv == NULL)
             {
-                printf("Command not found\n");
+                perror("malloc");
                 exit(EXIT_FAILURE);
             }
+            argv[0] = line;
+            argv[1] = NULL;
+            if (execve(line, argv, NULL) == -1)
+            {
+                perror("execve");
+                exit(EXIT_FAILURE);
+            }
+            break;
         }
         else
         {
-            wait(NULL);
+            waitpid(child_pid, NULL, 0);
         }
     }
-
     free(line);
     exit(EXIT_SUCCESS);
 }
+
+
