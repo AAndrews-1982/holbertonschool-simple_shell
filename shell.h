@@ -13,6 +13,7 @@ char **split_string(char *str, int *count);
 int main(void);
 void prompt();
 int execute_command(char *command);
+char *trim_spaces(char *str);
 
 /*String Helpers*/
 char *_strcat(char *dest, char *src);

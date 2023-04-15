@@ -10,6 +10,7 @@ int main(void)
     char *line = NULL;
     size_t len = 0;
     ssize_t read;
+    char *trimmed_line; /* Move the declaration here */
 
     while (1)
     {
@@ -24,8 +25,11 @@ int main(void)
         /* Remove the newline character from the command */
         line[read - 1] = '\0';
 
+        /* Trim spaces from the command */
+        trimmed_line = trim_spaces(line);
+
         /* Execute the command and check for errors */
-        if (execute_command(line) == -1)
+        if (execute_command(trimmed_line) == -1)
         {
             fprintf(stderr, "Error: command not found\n");
         }
@@ -55,27 +59,48 @@ int execute_command(char *command)
 {
     pid_t pid;
     int status;
-    char *path = "/bin/";
-    char *full_path;
+    char *path_env = getenv("PATH");
+    char *path, *save_ptr, *full_path;
     char *argv[2];
 
     if ((pid = fork()) == 0)
     {
         /* Child process */
-        full_path = malloc(strlen(path) + strlen(command) + 1);
-        if (full_path == NULL)
-        {
-            perror("Error: malloc failed");
-            exit(EXIT_FAILURE);
-        }
-
-        strcpy(full_path, path);
-        strcat(full_path, command);
-
-        argv[0] = full_path;
+        argv[0] = command;
         argv[1] = NULL;
 
-        execve(full_path, argv, NULL);
+        if (strchr(command, '/') != NULL)
+        {
+            /* If command contains '/', try executing it directly */
+            execve(command, argv, NULL);
+        }
+        else if (path_env != NULL)
+        {
+            path_env = strdup(path_env);
+
+            /* Iterate over directories in PATH */
+            path = strtok_r(path_env, ":", &save_ptr);
+            while (path != NULL)
+            {
+                full_path = malloc(strlen(path) + strlen(command) + 2);
+                if (full_path == NULL)
+                {
+                    perror("Error: malloc failed");
+                    exit(EXIT_FAILURE);
+                }
+
+                strcpy(full_path, path);
+                strcat(full_path, "/");
+                strcat(full_path, command);
+
+                execve(full_path, argv, NULL);
+
+                free(full_path);
+                path = strtok_r(NULL, ":", &save_ptr);
+            }
+
+            free(path_env);
+        }
 
         /* If execve returns, there was an error */
         perror(command);
