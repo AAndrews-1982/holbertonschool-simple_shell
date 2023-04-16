@@ -1,5 +1,5 @@
-#ifndef SHELL_H
-#define SHELL_H
+#ifndef MAIN_H
+#define MAIN_H
 
 #include <unistd.h>
 #include <stdio.h>
@@ -7,13 +7,17 @@
 #include <sys/wait.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <sys/stat.h>
 
 /* Prototypes */
-char **split_string(char *str, int *count);
-int main(void);
-void prompt();
-int execute_command(char *command);
-char *trim_spaces(char *str);
+/*char **split_string(char *str);*/
+/*char **split_path(char *thePath);*/
+void tokenize_string(char *str, char *delims, char **tokens);
+int create_child(char *call_path, char **str_arr);
+int check_path(char **path_array, char **token_array);
 
 /*String Helpers*/
 char *_strcat(char *dest, char *src);

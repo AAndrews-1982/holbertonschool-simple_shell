@@ -1,98 +1,132 @@
-#include "shell.h"
+#include "main.h"
+
+void tokenize_string(char *str, char *delims, char **tokens);
+int create_child(char *call_path, char **str_arr);
+int check_path(char **path_array, char **token_array);
 
 /**
- * main - shell entry point
+ * main - entry point
  *
- * Return: 0 on success
+ * Return: int
  */
-
 int main(void)
 {
-	char *buffer = NULL, **args = NULL;
-	size_t bufsize = 0;
-	ssize_t read_bytes = 0;
+	char *input = NULL;
+	char *path = NULL;
+	size_t size = 0;
+	char *tokarr[20];
+	char *patharr[20];
+	int ret_value = 0;
+
+	path = getenv("PATH");
+	tokenize_string(path, ":", patharr);
 
 	while (1)
 	{
-		printf("$ ");
-		read_bytes = getline(&buffer, &bufsize, stdin);
-		if (read_bytes == -1)
+		if (isatty(STDIN_FILENO))
+			write(STDOUT_FILENO, "$ ", 2);
+		if (getline(&input, &size, stdin) == -1)
 		{
-			free(buffer);
-			printf("\n");
+			free(input);
 			exit(EXIT_SUCCESS);
 		}
-		args = tokenize(buffer);
-		execute(args);
-		free(args);
+		tokenize_string(input, " \n\t", tokarr);
+
+		if (!tokarr[0] || _strcmp(tokarr[0], "env") == 0)
+			continue;
+		if (_strcmp(tokarr[0], "exit") == 0)
+		{
+			free(input);
+			exit(EXIT_SUCCESS);
+		}
+
+		if (access(tokarr[0], X_OK) == 0)
+			create_child(tokarr[0], tokarr);
+		else
+			ret_value = check_path(patharr, tokarr);
+
 	}
-	free(buffer);
-	return (0);
+	return (ret_value);
 }
 
+
 /**
- * tokenize - tokenize input string
- * @str: input string
- *
- * Return: array of pointers to tokens
+ * tokenize_string - tokenize a passed in string
+ * @str: string to tokenize
+ * @delims: deliminators
+ * @tokens: the array to save the tokens
+ * Return: void
  */
-
-char **tokenize(char *str)
+void tokenize_string(char *str, char *delims, char **tokens)
 {
-	char *token = NULL;
-	char **tokens = malloc(sizeof(char *) * TOKEN_BUFSIZE);
-	size_t i = 0;
+	char *path_token = strtok(str, delims);
+	int i = 0;
 
-	if (!tokens)
+	while (path_token != NULL)
 	{
-		fprintf(stderr, "Allocation error\n");
-		exit(EXIT_FAILURE);
-	}
-
-	token = strtok(str, TOKEN_DELIMITERS);
-	while (token != NULL)
-	{
-		tokens[i] = token;
+		tokens[i] = path_token;
 		i++;
-		token = strtok(NULL, TOKEN_DELIMITERS);
+		path_token = strtok(NULL, delims);
 	}
 	tokens[i] = NULL;
-	return (tokens);
 }
 
 /**
- * execute - execute command
- * @args: array of pointers to tokens
- *
- * Return: 0 on success, 1 on error
+ * check_path - check if the path leads to a system call
+ * @path_array: the string array containing the paths
+ * @token_array: the string array of tokens
+ * Return: int 127
  */
-
-int execute(char **args)
+int check_path(char **path_array, char **token_array)
 {
-	pid_t pid = 0;
+	int i = 0;
+	char *comp_path = NULL;
+	struct stat x;
+
+	while (path_array[i] != NULL)
+	{
+		comp_path = malloc(_strlen(token_array[0]) + _strlen(path_array[i]) + 2);
+		_strcpy(comp_path, path_array[i]);
+		_strcat(comp_path, "/");
+		_strcat(comp_path, token_array[0]);
+		if (stat(comp_path, &x) == 0)
+		{
+			create_child(comp_path, token_array);
+			free(comp_path);
+			return (0);
+		}
+		free(comp_path);
+		i++;
+	}
+	return (127);
+}
+
+/**
+ * create_child - function to create child process
+ * @call_path: path of system call
+ * @str_arr: array of string
+ * Return: int
+ */
+int create_child(char *call_path, char **str_arr)
+{
+	pid_t cop;
+	pid_t sig;
 	int status = 0;
 
-	if (args[0] == NULL)
-		return (1);
-
-	pid = fork();
-	if (pid == 0)
+	cop = fork();
+	if (cop == 0)
 	{
-		if (execvp(args[0], args) == -1)
-		{
-			perror("Error");
+		if (execve(call_path, str_arr, NULL) == -1)
 			exit(EXIT_FAILURE);
-		}
 	}
-	else if (pid < 0)
-	{
-		perror("Error");
+	else if (cop < 0)
 		exit(EXIT_FAILURE);
-	}
 	else
 	{
 		do {
-			waitpid(pid, &status, WUNTRACED);
-		}	while (!WIFEXITED(status) && !WIFSIGNALED(status));
-	return (0);
+			sig = waitpid(cop, &status, WUNTRACED);
+		} while (!WIFEXITED(status) && !WIFSIGNALED(status));
+	}
+	(void) sig;
+	return (status);
 }
