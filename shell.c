@@ -8,23 +8,23 @@
 
 int main(void)
 {
-		char *buffer = NULL, **args = NULL;
-		size_t bufsize = 0;
-		ssize_t read_bytes = 0;
+	char *buffer = NULL, **args = NULL;
+	size_t bufsize = 0;
+	ssize_t read_bytes = 0;
 
-		while (1)
+	while (1)
 	{
 		printf("$ ");
 		read_bytes = getline(&buffer, &bufsize, stdin);
-	if (read_bytes == -1)
-	{
-	free(buffer);
-	printf("\n");
-		exit(EXIT_SUCCESS);
-	}
-	args = tokenize(buffer);
-	execute(args);
-	free(args);
+		if (read_bytes == -1)
+		{
+			free(buffer);
+			printf("\n");
+			exit(EXIT_SUCCESS);
+		}
+		args = tokenize(buffer);
+		execute(args);
+		free(args);
 	}
 	free(buffer);
 	return (0);
@@ -39,22 +39,22 @@ int main(void)
 
 char **tokenize(char *str)
 {
-		char *token = NULL;
-		char **tokens = malloc(sizeof(char *) * TOKEN_BUFSIZE);
-		size_t i = 0;
+	char *token = NULL;
+	char **tokens = malloc(sizeof(char *) * TOKEN_BUFSIZE);
+	size_t i = 0;
 
 	if (!tokens)
 	{
-	fprintf(stderr, "Allocation error\n");
-	exit(EXIT_FAILURE);
+		fprintf(stderr, "Allocation error\n");
+		exit(EXIT_FAILURE);
 	}
 
 	token = strtok(str, TOKEN_DELIMITERS);
 	while (token != NULL)
 	{
-	tokens[i] = token;
-	i++;
-	token = strtok(NULL, TOKEN_DELIMITERS);
+		tokens[i] = token;
+		i++;
+		token = strtok(NULL, TOKEN_DELIMITERS);
 	}
 	tokens[i] = NULL;
 	return (tokens);
@@ -73,28 +73,26 @@ int execute(char **args)
 	int status = 0;
 
 	if (args[0] == NULL)
-	return (1);
+		return (1);
 
 	pid = fork();
 	if (pid == 0)
 	{
-	if (execvp(args[0], args) == -1)
-{
-		perror("Error");
-		exit(EXIT_FAILURE);
+		if (execvp(args[0], args) == -1)
 		{
+			perror("Error");
+			exit(EXIT_FAILURE);
+		}
 	}
 	else if (pid < 0)
 	{
-	perror("Error");
-	exit(EXIT_FAILURE);
+		perror("Error");
+		exit(EXIT_FAILURE);
 	}
 	else
 	{
-	do{
-		waitpid(pid, &status, WUNTRACED);
-	}
-	while (!WIFEXITED(status) && !WIFSIGNALED(status));
-	}
+		do {
+			waitpid(pid, &status, WUNTRACED);
+		}	while (!WIFEXITED(status) && !WIFSIGNALED(status));
 	return (0);
 }
