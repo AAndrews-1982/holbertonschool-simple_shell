@@ -8,24 +8,24 @@
  * Return: pointer to the resulting string
  */
 
-char *_strcat(char *dest, char *src);
-char *_strcpy(char *dest, char *src);
-int _strlen(char *s);
-int _strncmp(char *s1, char *s2, int n);
-int _strcmp(char *s1, char *s2);
-
+char *_strdup(char *str)
 {
-	int dest_len = _strlen(dest);
 	int i;
+	char *dest_str = NULL;
 
-	for (i = 0; src[i] != '\0'; i++)
+	if (str == NULL)
+		return (NULL);
+	for (i = 0; str[i] != '\0'; i++)
+		;
+	dest_str = malloc(sizeof(char) * (i + 1));
+	if (dest_str == NULL)
+		return (NULL);
+	for (i = 0; str[i] != '\0'; i++)
 	{
-		dest[dest_len + i] = src[i];
+		dest_str[i] = str[i];
 	}
-
-	dest[dest_len + i] = '\0';
-
-	return (dest);
+	dest_str[i] = '\0';
+	return (dest_str);
 }
 
 /**
@@ -78,26 +78,6 @@ int _strncmp(char *s1, char *s2, int n)
 	int i;
 
 	for (i = 0; i < n && s1[i] && s2[i]; i++)
-	{
-		if (s1[i] != s2[i])
-			return (s1[i] - s2[i]);
-	}
-
-	return (0);
-}
-
-/**
- * _strcmp - compares two strings
- * @s1: first string to compare
- * @s2: second string to compare
- *
- * Return: difference between the first non-matching characters
- */
-int _strcmp(char *s1, char *s2)
-{
-	int i;
-
-	for (i = 0; s1[i] && s2[i]; i++)
 	{
 		if (s1[i] != s2[i])
 			return (s1[i] - s2[i]);
