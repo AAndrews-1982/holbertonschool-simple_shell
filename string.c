@@ -7,7 +7,13 @@
  *
  * Return: pointer to the resulting string
  */
-char *_strcat(char *dest, char *src)
+
+char *_strcat(char *dest, char *src);
+char *_strcpy(char *dest, char *src);
+int _strlen(char *s);
+int _strncmp(char *s1, char *s2, int n);
+int _strcmp(char *s1, char *s2);
+
 {
 	int dest_len = _strlen(dest);
 	int i;

@@ -1,4 +1,4 @@
-#include "main.h"
+#include "shell.h"
 
 void tokenize_string(char *str, char *delims, char **tokens);
 int create_child(char *call_path, char **str_arr);
@@ -17,7 +17,7 @@ int main(void)
 	char *tokarr[20];
 	char *patharr[20];
 	int ret_value = 0;
-
+}
 	path = getenv("PATH");
 	tokenize_string(path, ":", patharr);
 
