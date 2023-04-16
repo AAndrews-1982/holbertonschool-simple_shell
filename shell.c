@@ -1,126 +1,100 @@
 #include "shell.h"
 
 /**
- * main - Main function for the simple shell
+ * main - shell entry point
  *
- * Return: 0 on success, otherwise an error code
+ * Return: 0 on success
  */
+
 int main(void)
 {
-    char *line = NULL;
-    size_t len = 0;
-    ssize_t read;
-    char *trimmed_line; /* Move the declaration here */
+		char *buffer = NULL, **args = NULL;
+		size_t bufsize = 0;
+		ssize_t read_bytes = 0;
 
-    while (1)
-    {
-        prompt();
-
-        read = getline(&line, &len, stdin);
-        if (read == -1)
-        {
-            break; /* Exit on end-of-file (Ctrl+D) */
-        }
-
-        /* Remove the newline character from the command */
-        line[read - 1] = '\0';
-
-        /* Trim spaces from the command */
-        trimmed_line = trim_spaces(line);
-
-        /* Execute the command and check for errors */
-        if (execute_command(trimmed_line) == -1)
-        {
-            fprintf(stderr, "Error: command not found\n");
-        }
-    }
-
-    free(line);
-
-    return 0;
+		while (1)
+	{
+		printf("$ ");
+		read_bytes = getline(&buffer, &bufsize, stdin);
+	if (read_bytes == -1)
+	{
+	free(buffer);
+	printf("\n");
+		exit(EXIT_SUCCESS);
+	}
+	args = tokenize(buffer);
+	execute(args);
+	free(args);
+	}
+	free(buffer);
+	return (0);
 }
 
 /**
- * prompt - Displays the shell prompt
- */
-void prompt(void)
-{
-    printf("$ ");
-    fflush(stdout);
-}
-
-/**
- * execute_command - Executes a command
- * @command: The command to execute
+ * tokenize - tokenize input string
+ * @str: input string
  *
- * Return: 0 on success, -1 on failure
+ * Return: array of pointers to tokens
  */
-int execute_command(char *command)
+
+char **tokenize(char *str)
 {
-    pid_t pid;
-    int status;
-    char *path_env = getenv("PATH");
-    char *path, *save_ptr, *full_path;
-    char *argv[2];
+		char *token = NULL;
+		char **tokens = malloc(sizeof(char *) * TOKEN_BUFSIZE);
+		size_t i = 0;
 
-    if ((pid = fork()) == 0)
-    {
-        /* Child process */
-        argv[0] = command;
-        argv[1] = NULL;
+	if (!tokens)
+	{
+	fprintf(stderr, "Allocation error\n");
+	exit(EXIT_FAILURE);
+	}
 
-        if (strchr(command, '/') != NULL)
-        {
-            /* If command contains '/', try executing it directly */
-            execve(command, argv, NULL);
-        }
-        else if (path_env != NULL)
-        {
-            path_env = strdup(path_env);
+	token = strtok(str, TOKEN_DELIMITERS);
+	while (token != NULL)
+	{
+	tokens[i] = token;
+	i++;
+	token = strtok(NULL, TOKEN_DELIMITERS);
+	}
+	tokens[i] = NULL;
+	return (tokens);
+}
 
-            /* Iterate over directories in PATH */
-            path = strtok_r(path_env, ":", &save_ptr);
-            while (path != NULL)
-            {
-                full_path = malloc(strlen(path) + strlen(command) + 2);
-                if (full_path == NULL)
-                {
-                    perror("Error: malloc failed");
-                    exit(EXIT_FAILURE);
-                }
+/**
+ * execute - execute command
+ * @args: array of pointers to tokens
+ *
+ * Return: 0 on success, 1 on error
+ */
 
-                strcpy(full_path, path);
-                strcat(full_path, "/");
-                strcat(full_path, command);
+int execute(char **args)
+{
+	pid_t pid = 0;
+	int status = 0;
 
-                execve(full_path, argv, NULL);
+	if (args[0] == NULL)
+	return (1);
 
-                free(full_path);
-                path = strtok_r(NULL, ":", &save_ptr);
-            }
-
-            free(path_env);
-        }
-
-        /* If execve returns, there was an error */
-        perror(command);
-        exit(EXIT_FAILURE);
-    }
-    else if (pid < 0)
-    {
-        /* Forking error */
-        perror("Error forking");
-        return -1;
-    }
-    else
-    {
-        /* Parent process */
-        if (waitpid(pid, &status, 0) == -1)
-        {
-            perror("Error waiting for child process");
-            return -1;
-        }
-    }
-
-    return 0;
+	pid = fork();
+	if (pid == 0)
+	{
+	if (execvp(args[0], args) == -1)
+{
+		perror("Error");
+		exit(EXIT_FAILURE);
+		{
+	}
+	else if (pid < 0)
+	{
+	perror("Error");
+	exit(EXIT_FAILURE);
+	}
+	else
+	{
+	do{
+		waitpid(pid, &status, WUNTRACED);
+	}
+	while (!WIFEXITED(status) && !WIFSIGNALED(status));
+	}
+	return (0);
 }
