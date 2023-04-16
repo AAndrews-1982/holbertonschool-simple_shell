@@ -19,7 +19,7 @@ void tokenize_string(char *str, char *delims, char **tokens);
 int create_child(char *call_path, char **str_arr);
 int check_path(char **path_array, char **token_array);
 
-/*String Helpers*/
+/*String*/
 char *_strcat(char *dest, char *src);
 char *_strcpy(char *dest, char *src);
 int _strlen(char *s);
