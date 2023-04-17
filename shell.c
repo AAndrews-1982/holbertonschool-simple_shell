@@ -122,4 +122,22 @@ int check_path(char **path_array, char **token_array)
 int create_child(char *call_path, char **str_arr)
 {
 	pid_t cop;
+	int status = 0;
 
+	cop = fork();
+	if (cop == 0)
+	{
+		if (execve(call_path, str_arr, NULL) == -1)
+			exit(EXIT_FAILURE);
+	}
+	else if (cop < 0)
+		exit(EXIT_FAILURE);
+	else
+	{
+		do {
+			cop = waitpid(cop, &status, WUNTRACED);
+		} while (!WIFEXITED(status) && !WIFSIGNALED(status));
+	}
+
+	return status;
+}

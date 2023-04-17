@@ -11,6 +11,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
 /* Prototypes */
 /*char **split_string(char *str);*/
