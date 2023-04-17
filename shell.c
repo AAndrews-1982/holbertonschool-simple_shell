@@ -139,5 +139,5 @@ int create_child(char *call_path, char **str_arr)
 		} while (!WIFEXITED(status) && !WIFSIGNALED(status));
 	}
 
-	return status;
+	return (status);
 }
