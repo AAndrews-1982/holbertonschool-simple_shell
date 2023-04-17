@@ -16,6 +16,9 @@ LTRACEOUTPUTFILE="checker_ltrace_output_standalone"
 SLEEP=`which sleep`
 SLEEPSECONDS=1
 
+# Test description
+echo "Testing if getline function was used by using ltrace"
+
 # Test: check if the getline function was used by using ltrace
 command="/bin/ls
 /bin/ls
@@ -25,7 +28,10 @@ command="/bin/ls
 rm -f $tmp_file
 
 # Send commands
+echo "Starting test..."
 echo "$command" | $LTRACE -bc -o $LTRACEOUTPUTFILE $SHELL > $OUTPUTFILE 2> /dev/null &
+echo "Contents of LTRACEOUTPUTFILE:"
+cat $LTRACEOUTPUTFILE
 
 # Wait a little bit
 $SLEEP $SLEEPSECONDS
@@ -39,6 +45,7 @@ else
 fi
 
 # Clean up
+echo "Test finished, cleaning up..."
 rm -f $tmp_file
 rm -f $OUTPUTFILE
 rm -f $LTRACEOUTPUTFILE
