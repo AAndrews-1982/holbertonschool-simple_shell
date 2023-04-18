@@ -1,11 +1,12 @@
 #include "shell.h"
 
 /**
- * _strcat - concatenates two strings
- * @dest: destination string
- * @src: source string
+ * _strdup - Duplicates a string by creating a new string in memory
+ *           and copying the contents of the given string.
+ * @str: The string to be duplicated.
  *
- * Return: pointer to the resulting string
+ * Return: A pointer to the newly allocated duplicated string, or NULL if
+ *         memory allocation fails or the input string is NULL.
  */
 
 char *_strdup(char *str)
