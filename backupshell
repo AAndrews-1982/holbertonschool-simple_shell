@@ -29,7 +29,6 @@ int main(int argc, char **argv, char **env)
 			path = (*env + 5);
 			break;
 		}
-		i
 		env++;
 	}
 	tokenize_string(path, ":", patharr);
@@ -45,22 +44,19 @@ int main(int argc, char **argv, char **env)
 		}
 		tokenize_string(input, " \n\t", tokarr);
 
-	if (!tokarr[0])
-		continue;
-        else if (_strcmp(tokarr[0], "exit") == 0)
+		if (!tokarr[0] || _strcmp(tokarr[0], "env") == 0)
+			continue;
+		if (_strcmp(tokarr[0], "exit") == 0)
 		{
-		free(input);
-		exit(EXIT_SUCCESS);
+			free(input);
+			exit(EXIT_SUCCESS);
 		}
-	else if (_strcmp(tokarr[0], "env") == 0)
-	{
-		print_env(env);
-	continue;
-	}
-	else if (access(tokarr[0], X_OK) == 0)
-		create_child(tokarr[0], tokarr);
-	else
-		ret_value = check_path(patharr, tokarr);
+
+		if (access(tokarr[0], X_OK) == 0)
+			create_child(tokarr[0], tokarr);
+		else
+			ret_value = check_path(patharr, tokarr);
+
 	}
 	return (ret_value);
 }
