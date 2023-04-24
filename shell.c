@@ -46,7 +46,10 @@ int main(int argc, char **argv, char **env)
 		tokenize_string(input, " \n\t", tokarr);
 
 		if (!tokarr[0] || _strcmp(tokarr[0], "env") == 0)
+		{
+			print_env(env);
 			continue;
+		}
 		if (_strcmp(tokarr[0], "exit") == 0)
 		{
 			free(input);
