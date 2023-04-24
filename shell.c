@@ -3,6 +3,7 @@
 void tokenize_string(char *str, char *delims, char **tokens);
 int create_child(char *call_path, char **str_arr);
 int check_path(char **path_array, char **token_array);
+void print_env(char **env);
 
 /**
  * main - entry point
@@ -61,6 +62,22 @@ int main(int argc, char **argv, char **env)
 	return (ret_value);
 }
 
+/**
+ * print_env - Prints the current environment.
+ * @env: An array of strings representing the environment variables.
+ *
+ * Description: This function iterates through the environment variables
+ * array and prints each variable followed by a newline character.
+ */
+void print_env(char **env)
+{
+	while (*env)
+	{
+		write(STDOUT_FILENO, *env, _strlen(*env));
+		write(STDOUT_FILENO, "\n", 1);
+		env++;
+	}
+}
 
 /**
  * tokenize_string - tokenize a passed in string
